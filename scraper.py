@@ -10,8 +10,6 @@ import requests
 import os
 import shelve
 import atexit
-# reload(sys)
-# sys.setdefaultencoding("latin-1")
 
 def download_file(download_url,stack):
     urlDecoded=urllib.parse.unquote(download_url)
@@ -106,6 +104,8 @@ session.set_attribute('auto_load_images', False)
 #registra função para executar em caso de término preoce/manual do script
 atexit.register(exit_handler)
 
+time.sleep(5)
+
 for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #pega todos os cursos e seus links
     url =  curso.get_attr("href")
     courseName = curso.text()
@@ -137,7 +137,8 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                 if url.startswith("%20"):
                     url = url [3:]
                 if not url.startswith("https://proofwiki") and not url.startswith("mailto"):
-                    f = session_requests.get(url)
+                    url1=prepareUrl(url)
+                    f = session_requests.get(url1)
                 time.sleep(4)
                 baixar = f.url
                 download_file(baixar,fileSystem)
@@ -148,6 +149,8 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
             if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
                 if url.startswith("%20"):
                     url = url [3:]
+                url1=prepareUrl(url)
+                f = session_requests.get(url1)
                 time.sleep(4)
                 baixar = f.url
                 download_file(baixar,fileSystem)
