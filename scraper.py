@@ -48,7 +48,6 @@ def exit_handler(): #executa quando script é interrompido, salva urls intermedi
 login = input("Digite seu usuário do Blackoard: ")
 senha = input("Digite sua senha do Blackoard: ")
 
-
 payload = {
 	"user_id": login,
 	"password": senha,
@@ -101,10 +100,12 @@ session.visit("https://insper.blackboard.com/webapps/portal/execute/tabs/tabActi
 session.set_error_tolerant(True)
 session.set_attribute('auto_load_images', False)
 
+refreshTime = 5
+
 #registra função para executar em caso de término preoce/manual do script
 atexit.register(exit_handler)
 
-time.sleep(5)
+time.sleep(refreshTime)
 
 for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #pega todos os cursos e seus links
     url =  curso.get_attr("href")
@@ -139,10 +140,10 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                 if not url.startswith("https://proofwiki") and not url.startswith("mailto"):
                     url1=prepareUrl(url)
                     f = session_requests.get(url1)
-                time.sleep(4)
-                baixar = f.url
-                download_file(baixar,fileSystem)
-                urls.append(url)
+                    time.sleep(refreshTime)
+                    baixar = f.url
+                    download_file(baixar,fileSystem)
+                    urls.append(url)
         for anexo in tree1.xpath("//*[@class='details']/div/div[2]/ul/li/a"): #procura arquivos anexados na pagina
             url = anexo.attrib.get("href")
             print ("4")
@@ -151,7 +152,7 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                     url = url [3:]
                 url1=prepareUrl(url)
                 f = session_requests.get(url1)
-                time.sleep(4)
+                time.sleep(refreshTime)
                 baixar = f.url
                 download_file(baixar,fileSystem)
                 urls.append(url)
@@ -173,7 +174,7 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                     if url.startswith("%20"):
                         url = url [3:]
                     f = session_requests.get(url)
-                    time.sleep(4)
+                    time.sleep(refreshTime)
                     baixar = f.url
                     download_file(baixar,fileSystem)
                     urls.append(url)
@@ -189,7 +190,7 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                         if url.startswith("%20"):
                             url = url [3:]
                         f = session_requests.get(url)
-                        time.sleep(4)
+                        time.sleep(refreshTime)
                         baixar = f.url
                         download_file(baixar,fileSystem)
                         urls.append(url)
@@ -206,7 +207,7 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                     if url not in urlsJaVisitadas:
                         urlNew = prepareUrl(url)
                         e = session_requests.get(urlNew)
-                        time.sleep(4)
+                        ttime.sleep(refreshTime)
                         baixar = e.url
                         download_file(baixar,fileSystem)
                         urls.append(url)
