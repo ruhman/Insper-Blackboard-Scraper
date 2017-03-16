@@ -44,9 +44,14 @@ def exit_handler(): #executa quando script é interrompido, salva urls intermedi
     sh.close()
     print (urls)
 
-#setar login e senha como string
-login = input("Digite seu usuário do Blackoard: ")
-senha = input("Digite sua senha do Blackoard: ")
+#setar login e senha como string. Utilizar argumentos ou pedir ao usuario
+if len(sys.argv) > 2:
+    login = sys.argv[1]
+    senha = sys.argv[2]
+
+else:
+    login = input("Digite seu usuário do Blackoard: ")
+    senha = input("Digite sua senha do Blackoard: ")
 
 payload = {
 	"user_id": login,
@@ -86,7 +91,7 @@ result = session_requests.post(
 #extensoes que queremos baixar e nome de pastas desnecessarios (lado esquerdo do BB)
 extensions = (".pdf",".doc",".ppt",".dox",".xlsx",".pptx",".docx","ipynb")
 tabIndesejaveis = ("Conteudo", "Conteúdos", "Avisos", "Notas", "Enviar", "Conte\xfados","Central de ajuda")
-
+needRemove = False
 #inicia sessão do dryscrape para acessar pagina inicial c/ JavaScript
 session = dryscrape.Session(base_url='https://insper.blackboard.com')
 session.set_attribute('auto_load_images', False)
@@ -100,7 +105,8 @@ session.visit("https://insper.blackboard.com/webapps/portal/execute/tabs/tabActi
 session.set_error_tolerant(True)
 session.set_attribute('auto_load_images', False)
 
-refreshTime = 5
+#define tempo de espera para reloads das páginas. Quanto pior a internet maior deve ser
+refreshTime = 8
 
 #registra função para executar em caso de término preoce/manual do script
 atexit.register(exit_handler)
@@ -116,102 +122,105 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
         print (name)
         fileSystem.append(name)
         print (fileSystem)
-    urlNew = prepareUrl(url)
-    a = session_requests.get(urlNew)
-    tree = html.fromstring(a.content)
-    print ("1")
-    for contudo in tree.xpath("//*[@id='courseMenuPalette_contents']/li/a"): #procura pagina Conteudo (ou outras)
-        url =  contudo.attrib.get("href")
-        tab = contudo.find('span').text
-        print (tab)
-        if not any(s in tab for s in tabIndesejaveis):
-            name = urllib.parse.unquote(tab)
-            fileSystem.append(name)
         urlNew = prepareUrl(url)
-        b = session_requests.get(urlNew)
-        tree1 = html.fromstring(b.content)
-        print ("2")
-        for anexo in tree1.xpath("//*[@class='details']/div/p/a"): #procura arquivos na pagina
-            url = anexo.attrib.get("href")
-            print ("3")
-            if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
-                if url.startswith("%20"):
-                    url = url [3:]
-                if not url.startswith("https://proofwiki") and not url.startswith("mailto"):
-                    url1=prepareUrl(url)
-                    f = session_requests.get(url1)
-                    time.sleep(refreshTime)
-                    baixar = f.url
-                    download_file(baixar,fileSystem)
-                    urls.append(url)
-        for anexo in tree1.xpath("//*[@class='details']/div/div[2]/ul/li/a"): #procura arquivos anexados na pagina
-            url = anexo.attrib.get("href")
-            print ("4")
-            if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
-                if url.startswith("%20"):
-                    url = url [3:]
-                url1=prepareUrl(url)
-                f = session_requests.get(url1)
-                time.sleep(refreshTime)
-                baixar = f.url
-                download_file(baixar,fileSystem)
-                urls.append(url)
-        for pasta in tree1.xpath("//*[@class='contentList']/li/div/h3/a"): #procura pastas dentro dos conteudos
-            pastaNome = pasta.find('span').text
-            url =  pasta.attrib.get("href")
-            if (pastaNome != None and pastaNome != "None"):
-                pasta = urllib.parse.unquote(pastaNome)
-                fileSystem.append(pasta)
-            urlNew = prepareUrl(url)
-            c = session_requests.get(urlNew)
-            tree2 = html.fromstring(c.content)
-            print ("5")
-            for anexo in tree2.xpath("//*[@class='details']/div/p/a"): #procura arquivos anexados
-                ## print(html.tostring(anexo, pretty_# print=True))
-                url = anexo.attrib.get("href")
-                print ("6")
-                if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and not url.endswith("book.pdf") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
-                    if url.startswith("%20"):
-                        url = url [3:]
-                    f = session_requests.get(url)
-                    time.sleep(refreshTime)
-                    baixar = f.url
-                    download_file(baixar,fileSystem)
-                    urls.append(url)
-            if c.url.endswith (extensions):
-                print ("opa")
-                download_file(c.url, fileSystem)
-                urls.append(c.url)
-            for arquivo in tree2.xpath("//*[@class='contentList']/li/div/h3/a"): #procura arquivos dentro das pastas
-                print ("7")
-                for anexo in tree2.xpath("//*[@class='details']/div/p/a"): #procura arquivos anexados
+        a = session_requests.get(urlNew)
+        tree = html.fromstring(a.content)
+        print ("1")
+        for contudo in tree.xpath("//*[@id='courseMenuPalette_contents']/li/a"): #procura pagina Conteudo (ou outras)
+            url =  contudo.attrib.get("href")
+            tab = contudo.find('span').text
+            print (tab)
+            if not any(s in tab for s in tabIndesejaveis):
+                name = urllib.parse.unquote(tab)
+                fileSystem.append(name)
+                needRemove = True
+                urlNew = prepareUrl(url)
+                b = session_requests.get(urlNew)
+                tree1 = html.fromstring(b.content)
+                print ("2")
+                for anexo in tree1.xpath("//*[@class='details']/div/p/a"): #procura arquivos na pagina
                     url = anexo.attrib.get("href")
-                    if url and not url.endswith("dip_gw_chap1_3.pdf") and not url.endswith("book.pdf") and url not in urlsJaVisitadas:
+                    print ("3")
+                    if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
                         if url.startswith("%20"):
                             url = url [3:]
-                        f = session_requests.get(url)
+                        if not url.startswith("https://proofwiki") and not url.startswith("mailto") and not url.endswith("0IG0Js"):
+                            url1=prepareUrl(url)
+                            f = session_requests.get(url1)
+                            time.sleep(refreshTime)
+                            baixar = f.url
+                            download_file(baixar,fileSystem)
+                            urls.append(url)
+                for anexo in tree1.xpath("//*[@class='details']/div/div[2]/ul/li/a"): #procura arquivos anexados na pagina
+                    url = anexo.attrib.get("href")
+                    print ("4")
+                    if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
+                        if url.startswith("%20"):
+                            url = url [3:]
+                        url1=prepareUrl(url)
+                        f = session_requests.get(url1)
                         time.sleep(refreshTime)
                         baixar = f.url
                         download_file(baixar,fileSystem)
                         urls.append(url)
-                        urls.append(f.url)
-                url =  arquivo.attrib.get("onclick")
-                if not url:
-                    break
-                urlNew = prepareUrl(url)
-                d = session_requests.get(urlNew)
-                tree3 = html.fromstring(d.content)
-                for doc in tree3.xpath("//*[@id='PDFEmbedID']"): #extrai o link de download dos arquivos
-                    print ("8")
-                    url =  doc.attrib.get("src")
-                    if url not in urlsJaVisitadas:
+                for pasta in tree1.xpath("//*[@class='contentList']/li/div/h3/a"): #procura pastas dentro dos conteudos
+                    pastaNome = pasta.find('span').text
+                    url =  pasta.attrib.get("href")
+                    if (pastaNome != None and pastaNome != "None"):
+                        pasta = urllib.parse.unquote(pastaNome)
+                        fileSystem.append(pasta)
+                    urlNew = prepareUrl(url)
+                    c = session_requests.get(urlNew)
+                    tree2 = html.fromstring(c.content)
+                    print ("5")
+                    for anexo in tree2.xpath("//*[@class='details']/div/p/a"): #procura arquivos anexados
+                        ## print(html.tostring(anexo, pretty_# print=True))
+                        url = anexo.attrib.get("href")
+                        print ("6")
+                        if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and not url.endswith("book.pdf") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
+                            if url.startswith("%20"):
+                                url = url [3:]
+                            f = session_requests.get(url)
+                            time.sleep(refreshTime)
+                            baixar = f.url
+                            download_file(baixar,fileSystem)
+                            urls.append(url)
+                    if c.url.endswith (extensions):
+                        print ("opa")
+                        download_file(c.url, fileSystem)
+                        urls.append(c.url)
+                    for arquivo in tree2.xpath("//*[@class='contentList']/li/div/h3/a"): #procura arquivos dentro das pastas
+                        print ("7")
+                        for anexo in tree2.xpath("//*[@class='details']/div/p/a"): #procura arquivos anexados
+                            url = anexo.attrib.get("href")
+                            if url and not url.endswith("dip_gw_chap1_3.pdf") and not url.endswith("book.pdf") and url not in urlsJaVisitadas:
+                                if url.startswith("%20"):
+                                    url = url [3:]
+                                f = session_requests.get(url)
+                                time.sleep(refreshTime)
+                                baixar = f.url
+                                download_file(baixar,fileSystem)
+                                urls.append(url)
+                                urls.append(f.url)
+                        url =  arquivo.attrib.get("onclick")
+                        if not url:
+                            break
                         urlNew = prepareUrl(url)
-                        e = session_requests.get(urlNew)
-                        ttime.sleep(refreshTime)
-                        baixar = e.url
-                        download_file(baixar,fileSystem)
-                        urls.append(url)
-            fileSystem.pop()
+                        d = session_requests.get(urlNew)
+                        tree3 = html.fromstring(d.content)
+                        for doc in tree3.xpath("//*[@id='PDFEmbedID']"): #extrai o link de download dos arquivos
+                            print ("8")
+                            url =  doc.attrib.get("src")
+                            if url not in urlsJaVisitadas:
+                                urlNew = prepareUrl(url)
+                                e = session_requests.get(urlNew)
+                                time.sleep(refreshTime)
+                                baixar = e.url
+                                download_file(baixar,fileSystem)
+                                urls.append(url)
+                    fileSystem.pop()
+                if needRemove:
+                    fileSystem.pop()
     fileSystem.pop()
     print (urls)
     sh=shelve.open('/tmp/shelve.tmp')  # Dump set (as one unit) to shelve file
