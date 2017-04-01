@@ -36,7 +36,7 @@ Exemplo:
 
 *  Para apagar o DB de arquivos já processados basta rodar ```rm -f tmp/shelve.tmp.db```. Ao rodar o script novamente, todos os links do Blackboard serão processados do 0.
 
-* Compatível com Python 2 e 3.
+* Compatível com Python 2 e 3. Em Python 2, não há compatibilidade com acentos em alguns sistemas.
 
 ## Contribuições:
 
@@ -47,3 +47,4 @@ PRs são mais que bem vindos! Algumas features e melhorias que pensei:
 * Refatorar, criar mais funções etc.
 * Opção de escolher uma matéria ou professor específico pelo script. ([Usar fuzzy?](https://pypi.python.org/pypi/fuzzywuzzy)).
 * Salvar links postados em arquivo.
+* Resolver bug acnto Python 2
