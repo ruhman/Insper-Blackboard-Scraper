@@ -24,11 +24,9 @@ Agora os arquivos vão começar a aparecer em pastas **no mesmo diretório** do 
 
 ## Features
 
-*  As matérias que serão baixadas são as presentes na lista da página inicial do Blackboard:
+*  As matérias que serão baixadas são as presentes na lista da página inicial do Blackboard. Portanto, basta adicionar ou remover matérias na lista para escolher as baixadas pelo script.
 
 [foto]
-
-Portanto, basta adicionar ou remover matérias na lista para escolher as baixadas pelo script.
 
 *  É possivel enviar login e senha como argumentos para evitar digitar repetidamente. 
 Exemplo:
@@ -37,3 +35,14 @@ Exemplo:
 *  É possível escolher as extensões de arquvivos de interesse. Para isso, basta editar a tupla ```extensions``` na linha 97
 
 *  Para apagar o DB de arquivos já processados basta rodar ```rm -f tmp/shelve.tmp.db```. Ao rodar o script novamente, todos os links do Blackboard serão processados do 0.
+
+* Compatível com python 2 e 3.
+
+## Contribuições:
+
+PRs são mais que bem vindos! Algumas features e melhorias que pensei:
+
+* Implementar [logging](https://docs.python.org/3/library/logging.html)
+* UI
+* Refatorar, criar mais funções etc.
+* Opção de escolher uma matéria ou professor específico pelo script. ([Usar fuzzy?](https://pypi.python.org/pypi/fuzzywuzzy))
