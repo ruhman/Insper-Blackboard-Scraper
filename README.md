@@ -26,7 +26,7 @@ Agora os arquivos vão começar a aparecer em pastas **no mesmo diretório** do 
 
 *  As matérias que serão baixadas são as presentes na lista da página inicial do Blackboard. Portanto, basta adicionar ou remover matérias na lista para escolher as baixadas pelo script.
 
-[foto]
+<img src="https://dl.dropboxusercontent.com/s/7wnm1ja1le5rkdz/Screenshot%202017-03-31%2022.41.31.png?dl=0" width="450">
 
 *  É possivel enviar login e senha como argumentos para evitar digitar repetidamente em múltiplas execuções. 
 Exemplo:
