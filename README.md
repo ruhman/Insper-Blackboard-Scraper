@@ -47,4 +47,4 @@ PRs são mais que bem vindos! Algumas features e melhorias que pensei:
 * Refatorar, criar mais funções etc.
 * Opção de escolher uma matéria ou professor específico pelo script. ([Usar fuzzy?](https://pypi.python.org/pypi/fuzzywuzzy)).
 * Salvar links postados em arquivo.
-* Resolver bug acnto Python 2
+* Resolver bug acento Python 2.
