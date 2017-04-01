@@ -2,7 +2,7 @@
 
 Esse projeto nasceu como algo que eu pessoalmente precisava. Sei que nos disponibilizam muito conteúdo de qualidade, e queria ter uma maneira de sempre te-lo a disposição. Porém, baixar todos os arquivos do Blackboard seria um processo muito lento. Decidi otimizar 😎
 
-Esse script faz download de todos os arquivos disponíveis, mantendo a estrutura organizacional. Ou seja, uma pasta por matéria e subpastas de acordo com a organização dos professores. Existem alguma otimizações para não repetir arquivos já baixados. Portanto, pode ser rodado conforme o tempo e apenas os arquivos novos serão baixados. Também é possível escolher as extensões de arquvivos de interesse.
+Esse script faz download de todos os arquivos disponíveis, mantendo a estrutura organizacional. Ou seja, uma pasta por matéria e subpastas de acordo com a organização dos professores. Existem alguma otimizações para não repetir arquivos já baixados. Portanto, pode ser rodado conforme o tempo e apenas os arquivos novos serão baixados.
 
 ## Instalação
 
@@ -24,11 +24,16 @@ Agora os arquivos vão começar a aparecer em pastas **no mesmo diretório** do 
 
 ## Features
 
-1.  As matérias que serão baixadas são as presentes na lista da página inicial do Blackboard:
+*  As matérias que serão baixadas são as presentes na lista da página inicial do Blackboard:
 
 [foto]
 
 Portanto, basta adicionar ou remover matérias na lista para escolher as baixadas pelo script.
 
-1.  É possivel enviar login e senha como argumentos para evitar digitar repetidamente. Exemplo:
+*  É possivel enviar login e senha como argumentos para evitar digitar repetidamente. 
+Exemplo:
 ``` python scraper.py joaofb1 123456```
+
+*  É possível escolher as extensões de arquvivos de interesse. Para isso, basta editar a tupla ```extensions``` na linha 97
+
+*  Para apagar o DB de arquivos já processados basta rodar ```rm -f tmp/shelve.tmp.db```. Ao rodar o script novamente, todos os links do Blackboard serão processados do 0.
