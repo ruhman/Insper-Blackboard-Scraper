@@ -1,4 +1,4 @@
-# Insper-Blackboard-Scraper
+# Insper Blackboard Scraper
 
 Esse projeto nasceu como algo que eu pessoalmente precisava. Sei que nos disponibilizam muito conteúdo de qualidade, e queria ter uma maneira de sempre te-lo a disposição. Porém, baixar todos os arquivos do Blackboard seria um processo muito lento. Decidi otimizar 😎
 
