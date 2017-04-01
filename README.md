@@ -2,7 +2,7 @@
 
 Esse projeto nasceu como algo que eu pessoalmente precisava. Sei que nos disponibilizam muito conteúdo de qualidade, e queria ter uma maneira de sempre te-lo a disposição. Porém, baixar todos os arquivos do Blackboard seria um processo muito lento. Decidi otimizar 😎.
 
-Esse script faz download de todos os arquivos disponíveis, mantendo a estrutura organizacional. Ou seja, uma pasta por matéria e subpastas de acordo com a organização dos professores. Existem alguma otimizações para não repetir arquivos já processados. Portanto, pode ser rodado conforme o tempo e apenas os arquivos novos serão baixados.
+Esse script faz download de todos os arquivos disponíveis, mantendo a estrutura organizacional. Ou seja, uma pasta por matéria e subpastas de acordo com a organização dos professores. Existem algumas otimizações para não repetir arquivos já processados. Portanto, pode ser rodado conforme o tempo e apenas os arquivos novos serão baixados.
 
 ## Instalação
 
