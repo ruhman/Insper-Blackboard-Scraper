@@ -4,22 +4,34 @@ sys.path.append('/Library/Python/2.7/site-packages')
 from lxml import html
 import dryscrape
 import time
-import urllib.request
-import urllib.parse
+try:
+  import urlparse
+except ImportError:
+  import urllib
+  urlparse = urllib.parse
 import requests
 import os
 import shelve
 import atexit
 
+try:
+    reload  # Python 2.7
+except NameError:
+    try:
+        from importlib import reload  # Python 3.4+
+    except ImportError:
+        from imp import reload  # Python 3.0 - 3.3
+reload(sys)
+
 def download_file(download_url,stack):
-    urlDecoded=urllib.parse.unquote(download_url)
+    urlDecoded=urlparse.unquote(download_url)
     file_name = urlDecoded.split("/")[-1] #nome do arquivo avulso
     tree = "/".join(str(x) for x in stack) #diretorio
     tree1 = tree.replace("/1", "")
     tree2 = tree1.replace("/2", "") #removem indicadores de semetre
     print (tree2)
     file_name_final = (tree2 + "/" + file_name) #diretorio + nome do arquivo
-    final=urllib.parse.unquote(file_name_final) # encodado acabei de remover
+    final=urlparse.unquote(file_name_final) # encodado acabei de remover
     if not os.path.exists(tree2):
         os.makedirs(tree2) #cria o diretorio se necessario
     if not os.path.exists(final) and file_name_final and file_name.endswith (extensions) and not file_name.startswith ("PNAD"):
@@ -38,7 +50,7 @@ def prepareUrl(url): #prepara a URL para ser acessada
     newUrl.strip()
     return newUrl
 
-def exit_handler(): #executa quando script é interrompido, salva urls intermediarias no DB
+def exit_handler(): #executa quando o script é interrompido, salva urls intermediarias no DB
     sh=shelve.open('/tmp/shelve.tmp')
     sh['urls']=urls
     sh.close()
@@ -90,8 +102,9 @@ result = session_requests.post(
 
 #extensoes que queremos baixar e nome de pastas desnecessarios (lado esquerdo do BB)
 extensions = (".pdf",".doc",".ppt",".dox",".xlsx",".pptx",".docx","ipynb")
-tabIndesejaveis = ("Conteudo", "Conteúdos", "Avisos", "Notas", "Enviar", "Conte\xfados","Central de ajuda")
+tabIndesejaveis = ("Avisos", "Notas", "Enviar","Central de ajuda")
 needRemove = False
+
 #inicia sessão do dryscrape para acessar pagina inicial c/ JavaScript
 session = dryscrape.Session(base_url='https://insper.blackboard.com')
 session.set_attribute('auto_load_images', False)
@@ -106,9 +119,9 @@ session.set_error_tolerant(True)
 session.set_attribute('auto_load_images', False)
 
 #define tempo de espera para reloads das páginas. Quanto pior a internet maior deve ser
-refreshTime = 8
+refreshTime = 25
 
-#registra função para executar em caso de término preoce/manual do script
+#registra função para executar em caso de término precoce/manual do script
 atexit.register(exit_handler)
 
 time.sleep(refreshTime)
@@ -118,7 +131,7 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
     courseName = curso.text()
     print (courseName)
     if (courseName != None and courseName != "None"):
-        name = urllib.parse.unquote(courseName)
+        name = urlparse.unquote(courseName)
         print (name)
         fileSystem.append(name)
         print (fileSystem)
@@ -131,7 +144,8 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
             tab = contudo.find('span').text
             print (tab)
             if not any(s in tab for s in tabIndesejaveis):
-                name = urllib.parse.unquote(tab)
+                # if not tab.startswith("Conteudo") and not tab.startswith("Conteúdos") and not tab.startswith("Conteudo"):
+                name = urlparse.unquote(tab)
                 fileSystem.append(name)
                 needRemove = True
                 urlNew = prepareUrl(url)
@@ -167,26 +181,26 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                     pastaNome = pasta.find('span').text
                     url =  pasta.attrib.get("href")
                     if (pastaNome != None and pastaNome != "None"):
-                        pasta = urllib.parse.unquote(pastaNome)
+                        pasta = urlparse.unquote(pastaNome)
                         fileSystem.append(pasta)
                     urlNew = prepareUrl(url)
                     c = session_requests.get(urlNew)
                     tree2 = html.fromstring(c.content)
                     print ("5")
                     for anexo in tree2.xpath("//*[@class='details']/div/p/a"): #procura arquivos anexados
-                        ## print(html.tostring(anexo, pretty_# print=True))
+                        ## print(html.tostring(anexo, pretty_print=True))
                         url = anexo.attrib.get("href")
                         print ("6")
                         if url and not url.endswith("xid-1522183_2") and not url.endswith(".html") and not url.endswith("book.pdf") and url not in urlsJaVisitadas: #TODO: salvar links html separadamente:
                             if url.startswith("%20"):
                                 url = url [3:]
-                            f = session_requests.get(url)
+                            url1 = prepareUrl(url)
+                            f = session_requests.get(url1)
                             time.sleep(refreshTime)
                             baixar = f.url
                             download_file(baixar,fileSystem)
                             urls.append(url)
                     if c.url.endswith (extensions):
-                        print ("opa")
                         download_file(c.url, fileSystem)
                         urls.append(c.url)
                     for arquivo in tree2.xpath("//*[@class='contentList']/li/div/h3/a"): #procura arquivos dentro das pastas
@@ -196,7 +210,8 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                             if url and not url.endswith("dip_gw_chap1_3.pdf") and not url.endswith("book.pdf") and url not in urlsJaVisitadas:
                                 if url.startswith("%20"):
                                     url = url [3:]
-                                f = session_requests.get(url)
+                                url1 = prepareUrl(url)
+                                f = session_requests.get(url1)
                                 time.sleep(refreshTime)
                                 baixar = f.url
                                 download_file(baixar,fileSystem)
@@ -221,8 +236,8 @@ for curso in session.xpath("//div[@id='_26_1termCourses_noterm']/ul/li/a"): #peg
                     fileSystem.pop()
                 if needRemove:
                     fileSystem.pop()
+                    needRemove = False
     fileSystem.pop()
-    print (urls)
     sh=shelve.open('/tmp/shelve.tmp')  # Dump set (as one unit) to shelve file
     sh['urls']=urls
     sh.close()
